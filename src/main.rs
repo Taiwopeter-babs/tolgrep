@@ -6,9 +6,7 @@ use std::process;
 use tolgrep::{search, search_case_insensitive};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let args: Vec<String> = env::args().collect();
-
-    let config = Config::build(&args).unwrap_or_else(|error| {
+    let config = Config::build(env::args()).unwrap_or_else(|error| {
         eprintln!("Problem parsing arguments: {error}");
         process::exit(1)
     });
@@ -32,25 +30,33 @@ pub struct Config {
 impl Config {
     ///
     /// Creates a new instance of a `Config` from `String` slice
-    fn build(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("Not enough arguments");
-        }
+    fn build<T>(mut args: T) -> Result<Config, &'static str>
+    where
+        T: Iterator<Item = String>,
+    {
+        // Go over the first item which is the name of the program
+        args.next();
 
-        let query = args[1].clone();
-        let file_path = args[2].clone();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Query string not provided"),
+        };
 
-        let mut ignore_case_option: bool = false;
+        let file_path = match args.next() {
+            Some(arg) => arg,
+            None => return Err("File path is not provided"),
+        };
 
-        if args.len() > 3 {
-            let third_arg = args[3].clone();
-
-            ignore_case_option = if third_arg.to_lowercase() == "i" {
-                true
-            } else {
-                false
+        let ignore_case_option = match args.next() {
+            Some(arg) => {
+                if arg.to_lowercase() == "i" {
+                    true
+                } else {
+                    false
+                }
             }
-        }
+            None => false,
+        };
 
         let ignore_case = env::var("IGNORE_CASE").is_ok();
 
