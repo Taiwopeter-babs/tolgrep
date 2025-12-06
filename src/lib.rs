@@ -13,48 +13,62 @@ impl<'a> PartialEq for LineResult<'a> {
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<LineResult<'a>> {
-    let mut results: Vec<LineResult> = Vec::new();
-
-    for (index, line) in &mut contents.lines().enumerate() {
-        if line.contains(query) {
-            results.push(LineResult {
-                index: index + 1,
-                line: line.trim(),
-            });
-        }
-    }
+    let results = contents
+        .lines()
+        .into_iter()
+        .enumerate()
+        .map(|(index, line)| LineResult {
+            index: index + 1,
+            line: line.trim(),
+        })
+        .filter(|line_result| line_result.line.contains(query))
+        .map(|line_result| LineResult {
+            index: line_result.index,
+            line: line_result.line,
+        })
+        .collect::<Vec<LineResult>>();
 
     results
 }
 
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<LineResult<'a>> {
-    let mut results: Vec<LineResult> = Vec::new();
     let query = query.to_lowercase();
 
-    for (index, line) in &mut contents.lines().enumerate() {
-        if line.to_lowercase().contains(&query) {
-            results.push(LineResult {
-                index: index + 1,
-                line: line.trim(),
-            });
-        }
-    }
+    let results = contents
+        .lines()
+        .into_iter()
+        .enumerate()
+        .map(|(index, line)| LineResult {
+            index: index + 1,
+            line: line.trim(),
+        })
+        .filter(|line_result| line_result.line.to_lowercase().contains(&query))
+        .map(|line_result| LineResult {
+            index: line_result.index,
+            line: line_result.line,
+        })
+        .collect::<Vec<LineResult>>();
 
     results
 }
 
 pub fn search_case_insensitive_ascii<'a>(query: &str, contents: &'a str) -> Vec<LineResult<'a>> {
-    let mut results: Vec<LineResult> = Vec::new();
     let query = query.to_ascii_lowercase();
 
-    for (index, line) in &mut contents.lines().enumerate() {
-        if line.to_ascii_lowercase().contains(&query) {
-            results.push(LineResult {
-                index: index + 1,
-                line: line.trim(),
-            });
-        }
-    }
+    let results = contents
+        .lines()
+        .into_iter()
+        .enumerate()
+        .map(|(index, line)| LineResult {
+            index: index + 1,
+            line: line.trim(),
+        })
+        .filter(|line_result| line_result.line.to_ascii_lowercase().contains(&query))
+        .map(|line_result| LineResult {
+            index: line_result.index,
+            line: line_result.line,
+        })
+        .collect::<Vec<LineResult>>();
 
     results
 }
